@@ -1,0 +1,170 @@
+let userPref = { 
+    dietary: [],
+    maxDistance: 2.0 // in km
+};
+
+let userCoords = null; // Will store {lat, lon}
+let allRestaurants = []; // Raw data from backend
+let filtList = []; // Data after JS filters are applied
+let currentIndex = 0;
+let matches = [];
+
+// Haversine Formula to calculate distances
+// https://stackoverflow.com/questions/14560999/using-the-haversine-formula-in-javascript
+/**
+ * Calculates the great-circle distance between two points on a sphere.
+ * Returns distance in kilometers.
+ */
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180; // Get angle in radians (Radians = Degrees x (pi/180))
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; 
+}
+
+// Communicate with backend
+async function fetchRestaurants() {
+    // Fallback to Goldsmiths if GPS isn't ready
+    const coords = userCoords || { lat: 51.4743, lon: -0.0354 }; 
+    
+    console.log("🚀 Fetching raw data from backend...");
+
+    try {
+        const response = await fetch('/api/restaurants/search', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                lat: coords.lat,
+                lon: coords.lon,
+                radius_m: 5000 // Fetch a wide 5km net, allow user to change this manually
+            })
+        });
+
+        if (!response.ok) throw new Error(`Status: ${response.status}`);
+
+        const data = await response.json();
+        console.log("✅ Data received:", data.length, "restaurants found.");
+        
+        allRestaurants = data; 
+        applyFilters(); // Initial run
+
+    } catch (error) {
+        console.error("Connection Error:", error);
+        const card = document.getElementById("card");
+        if (card) card.innerHTML = `<h3>Server Error</h3><p>Check if Flask is running.</p>`;
+    }
+}
+
+// Filtering
+function getRecs() {
+    if (!allRestaurants || !userCoords) return [];
+
+    return allRestaurants.filter(res => {
+        // Calculate distance from user's LIVE location
+        const dist = calculateDistance(userCoords.lat, userCoords.lon, res.lat, res.lon);
+        res.distance_km = dist; // Attach for UI use
+
+        // Filter by Max Distance
+        if (dist > userPref.maxDistance) return false;
+
+        // Filter by Dietary
+        const matchesDietary = userPref.dietary.every(req => {
+            return res.dietary && res.dietary.map(d => d.toLowerCase()).includes(req.toLowerCase());
+        });
+
+        return matchesDietary;
+    })
+    .sort((a, b) => a.distance_km - b.distance_km); // Closest first
+}
+
+// Display updates to user
+function updateUI() {
+    const card = document.getElementById("card");
+    if (!card) return;
+
+    if (filtList.length === 0) {
+        card.innerHTML = "<h3>No matches found.</h3><p>Try increasing your distance!</p>";
+        return;
+    }
+
+    if (currentIndex >= filtList.length) {
+        card.innerHTML = "<h3>End of the line!</h3><p>No more restaurants nearby.</p>";
+        return;
+    }
+
+    const current = filtList[currentIndex];
+    const displayDist = current.distance_km.toFixed(1);
+
+    card.innerHTML = `
+        <div class="restaurant-content">
+            <h2>${current.name}</h2>
+            <p class="distance-badge">📍 ${displayDist} km away</p>
+            <p><strong>Cuisines:</strong> ${current.cuisines ? current.cuisines.join(", ") : "Various"}</p>
+            <div class="tags">
+                ${current.dietary ? current.dietary.map(t => `<span class="tag">${t}</span>`).join("") : ""}
+            </div>
+        </div>
+    `;
+}
+
+function applyFilters() {
+    // Get values from the HTML inputs
+    const distInput = document.getElementById('dist-input');
+    if (distInput) userPref.maxDistance = parseFloat(distInput.value);
+
+    const checkboxes = document.querySelectorAll('.diet-check:checked');
+    userPref.dietary = Array.from(checkboxes).map(cb => cb.value);
+
+    // Run the list generation again
+    filtList = getRecs();
+    currentIndex = 0;
+    updateUI();
+    updateCounter();
+}
+
+// Get user location and set default as Goldsmiths
+function getLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                userCoords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+                console.log("📍 GPS Locked:", userCoords);
+                fetchRestaurants(); // Load data once we know where we are
+            },
+            (err) => {
+                console.warn("⚠️ GPS Failed, using fallback.");
+                userCoords = { lat: 51.4743, lon: -0.0354 }; // Goldsmiths fallback
+                fetchRestaurants();
+            }
+        );
+    }
+}
+
+function handleSwipe(direction) {
+    if (currentIndex < filtList.length) {
+        if (direction === "right") matches.push(filtList[currentIndex]);
+        currentIndex++;
+        updateUI();
+        updateCounter();
+    }
+}
+
+function updateCounter() {
+    const counter = document.getElementById('counter');
+    if (counter) {
+        counter.innerText = filtList.length > 0 
+            ? `Card ${currentIndex + 1} of ${filtList.length}` 
+            : "No restaurants";
+    }
+}
+
+// Startup when DOM loads
+document.addEventListener("DOMContentLoaded", () => {
+    getLocation();
+});
