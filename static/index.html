@@ -28,12 +28,41 @@
         font-size: 0.9rem;
         border: 1px solid #ddd;
         transition: background 0.3s;
+        }
+
+        .website-btn:hover {
+            background-color: #e2e6ea;
+        }    
+        
+    #card {
+        width: 320px;
+        height: 450px;
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        cursor: grab;
+        user-select: none; /* Prevents text highlighting while swiping */
+        touch-action: none; /* Essential for mobile */
+        position: absolute; /* Overlap logic */
+        left: 50%;
+        margin-left: -160px; /* Centers the 320px card */
     }
 
-    .website-btn:hover {
-        background-color: #e2e6ea;
-    }    
-        
+    .website-btn {
+        display: block;
+        background: #007bff;
+        color: white;
+        text-align: center;
+        padding: 10px;
+        border-radius: 10px;
+        text-decoration: none;
+        margin-top: 15px;
+    }
+
     </style>
 </head>
 <body>
