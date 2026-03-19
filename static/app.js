@@ -1,155 +1,128 @@
-// --- 1. GLOBAL STATE ---
-let allRestaurants = []; // This stays populated from your initial Fetch
-let filtList = [];       // This changes based on your filters
+let userPref = { 
+    dietary: [],
+    maxDistance: 2.0 // in km
+};
+
+let userCoords = null; // Will store {lat, lon}
+let allRestaurants = []; // Raw data from backend
+let filtList = []; // Data after JS filters are applied
 let currentIndex = 0;
-let startX = 0;
-let currentX = 0;
-let isDragging = false;
+let matches = [];
 
-// --- 2. DATA INITIALIZATION ---
-// This runs once when the page loads to get data from your Python backend
-async function loadInitialData() {
+// Haversine Formula to calculate distances
+// https://stackoverflow.com/questions/14560999/using-the-haversine-formula-in-javascript
+/**
+ * Calculates the great-circle distance between two points on a sphere.
+ * Returns distance in kilometers.
+ */
+function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371; // Earth's radius in km
+    const dLat = (lat2 - lat1) * Math.PI / 180; // Get angle in radians (Radians = Degrees x (pi/180))
+    const dLon = (lon2 - lon1) * Math.PI / 180;
+    
+    const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+              Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+              Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c; 
+}
+
+// Communicate with backend
+async function fetchRestaurants() {
+    // Fallback to Goldsmiths if GPS isn't ready
+    const coords = userCoords || { lat: 51.4743, lon: -0.0354 }; 
+    
+    console.log("🚀 Fetching raw data from backend...");
+
     try {
-        const response = await fetch('/get_restaurants'); // Replace with your actual Flask route
-        allRestaurants = await response.json();
-        console.log("Data Loaded:", allRestaurants.length);
+        const response = await fetch('/api/restaurants/search', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                lat: coords.lat,
+                lon: coords.lon,
+                radius_m: 5000 // Fetch a wide 5km net, allow user to change this manually
+            })
+        });
+
+        if (!response.ok) throw new Error(`Status: ${response.status}`);
+
+        const data = await response.json();
+        console.log("✅ Data received:", data.length, "restaurants found.");
         
-        // Auto-run filters once to start the app
-        applyFilters();
-    } catch (err) {
-        console.error("Failed to fetch restaurants:", err);
-        document.getElementById("card").innerHTML = "<h3>Error loading data.</h3>";
-    }
-}
+        allRestaurants = data; 
+        applyFilters(); // Initial run
 
-// --- 3. FILTER LOGIC ---
-function applyFilters() {
-    currentIndex = 0; // Always restart at the first card
-
-    const maxDist = parseFloat(document.getElementById("dist-input").value) || 1.5;
-    const selectedDiets = Array.from(document.querySelectorAll(".diet-check:checked")).map(cb => cb.value);
-
-    // Filter logic
-    filtList = allRestaurants.filter(rest => {
-        const distMatch = rest.distance_km <= maxDist;
-        const dietMatch = selectedDiets.length === 0 || 
-                         selectedDiets.every(d => rest.dietary && rest.dietary.includes(d));
-        return distMatch && dietMatch;
-    });
-
-    console.log("Filtered Matches:", filtList.length);
-    updateUI();
-}
-
-// --- 4. GESTURE ENGINE (Swipe Physics) ---
-function initSwipe() {
-    const card = document.getElementById("card");
-    if (!card || filtList.length === 0 || currentIndex >= filtList.length) return;
-
-    // Remove old listeners to prevent "double-swiping"
-    card.replaceWith(card.cloneNode(true));
-    const newCard = document.getElementById("card");
-
-    newCard.addEventListener("mousedown", startSwipe);
-    newCard.addEventListener("touchstart", startSwipe, { passive: false });
-}
-
-function startSwipe(e) {
-    isDragging = true;
-    startX = e.type === "touchstart" ? e.touches[0].clientX : e.clientX;
-    
-    document.addEventListener("mousemove", moveSwipe);
-    document.addEventListener("touchmove", moveSwipe, { passive: false });
-    document.addEventListener("mouseup", endSwipe);
-    document.addEventListener("touchend", endSwipe);
-    
-    document.getElementById("card").style.transition = "none";
-}
-
-function moveSwipe(e) {
-    if (!isDragging) return;
-    const card = document.getElementById("card");
-    currentX = (e.type === "touchmove" ? e.touches[0].clientX : e.clientX) - startX;
-    
-    const rotation = currentX / 15;
-    card.style.transform = `translateX(${currentX}px) rotate(${rotation}deg)`;
-
-    // Feedback colors
-    if (currentX > 50) card.style.backgroundColor = "#e6fffa"; // Green tint
-    else if (currentX < -50) card.style.backgroundColor = "#fff5f5"; // Red tint
-    else card.style.backgroundColor = "white";
-}
-
-function endSwipe() {
-    isDragging = false;
-    document.removeEventListener("mousemove", moveSwipe);
-    document.removeEventListener("touchmove", moveSwipe);
-    
-    if (Math.abs(currentX) > 120) {
-        animateOut(currentX > 0 ? "right" : "left");
-    } else {
+    } catch (error) {
+        console.error("Connection Error:", error);
         const card = document.getElementById("card");
-        card.style.transition = "transform 0.3s ease";
-        card.style.transform = "translateX(0) rotate(0)";
-        card.style.backgroundColor = "white";
+        if (card) card.innerHTML = `<h3>Server Error</h3><p>Check if Flask is running.</p>`;
     }
 }
 
-function animateOut(direction) {
-    const card = document.getElementById("card");
-    const moveX = direction === "right" ? 1000 : -1000;
-    
-    card.style.transition = "transform 0.5s ease-in";
-    card.style.transform = `translateX(${moveX}px) rotate(${moveX / 20}deg)`;
+// Filtering
+function getRecs() {
+    if (!allRestaurants || !userCoords) return [];
 
-    setTimeout(() => {
-        currentIndex++;
-        updateUI();
-    }, 300);
+    return allRestaurants.filter(res => {
+        // Calculate distance from user's LIVE location
+        const dist = calculateDistance(userCoords.lat, userCoords.lon, res.lat, res.lon);
+        res.distance_km = dist; // Attach for UI use
+
+        // Filter by Max Distance
+        if (dist > userPref.maxDistance) return false;
+
+        // Filter by Dietary
+        const matchesDietary = userPref.dietary.every(req => {
+            return res.dietary && res.dietary.map(d => d.toLowerCase()).includes(req.toLowerCase());
+        });
+
+        return matchesDietary;
+    })
+    .sort((a, b) => a.distance_km - b.distance_km); // Closest first
 }
 
-// --- 5. UI RENDERER ---
+// Display updates to user
 function updateUI() {
     const card = document.getElementById("card");
-    const counter = document.getElementById("counter");
     if (!card) return;
 
-    // Reset Visuals
-    card.style.transition = "none";
-    card.style.transform = "translateX(0) rotate(0)";
-    card.style.backgroundColor = "white";
-    currentX = 0;
-
-    // Handle Empty or End states
     if (filtList.length === 0) {
-        counter.innerText = "0 of 0";
-        card.innerHTML = "<h3>No matches found.</h3><p>Try wider filters!</p>";
+        card.innerHTML = "<h3>No matches found.</h3><p>Try increasing your distance!</p>";
         return;
     }
 
     if (currentIndex >= filtList.length) {
-        counter.innerText = `${filtList.length} of ${filtList.length}`;
-        card.innerHTML = "<h3>All caught up!</h3><button onclick='applyFilters()'>Restart</button>";
+        card.innerHTML = "<h3>End of the line!</h3><p>No more restaurants nearby.</p>";
         return;
     }
 
-    // Prepare Restaurant Data
     const current = filtList[currentIndex];
-    counter.innerText = `Card ${currentIndex + 1} of ${filtList.length}`;
+    const displayDist = current.distance_km.toFixed(1);
 
-    // DEFENSIVE WEBSITE LINK
     let websiteHTML = "";
     if (current.website && current.website !== "null") {
         let cleanUrl = current.website.trim();
-        if (!cleanUrl.startsWith("http")) cleanUrl = `https://${cleanUrl}`;
-        websiteHTML = `<a href="${cleanUrl}" target="_blank" class="website-btn">🌐 View Website</a>`;
+        
+        // Ensure the URL starts with http or https so it doesn't break the link
+        if (!cleanUrl.startsWith("http://") && !cleanUrl.startsWith("https://")) {
+            cleanUrl = `https://${cleanUrl}`;
+        }
+
+        websiteHTML = `
+            <div class="website-container">
+                <a href="${cleanUrl}" target="_blank" rel="noopener noreferrer" class="website-btn">
+                    🌐 Visit Website
+                </a>
+            </div>
+        `;
     }
 
-    // Inject Content
     card.innerHTML = `
         <div class="restaurant-content">
             <h2>${current.name}</h2>
-            <p>📍 ${current.distance_km.toFixed(1)} km away</p>
+            <p class="distance-badge">📍 ${displayDist} km away</p>
             <p><strong>Cuisines:</strong> ${current.cuisines ? current.cuisines.join(", ") : "Various"}</p>
             <div class="tags">
                 ${current.dietary ? current.dietary.map(t => `<span class="tag">${t}</span>`).join("") : ""}
@@ -157,10 +130,60 @@ function updateUI() {
             ${websiteHTML}
         </div>
     `;
-
-    // Re-bind the Swipe Engine to the new HTML
-    initSwipe();
 }
 
-// Start the app
-window.onload = loadInitialData;
+function applyFilters() {
+    // Get values from the HTML inputs
+    const distInput = document.getElementById('dist-input');
+    if (distInput) userPref.maxDistance = parseFloat(distInput.value);
+
+    const checkboxes = document.querySelectorAll('.diet-check:checked');
+    userPref.dietary = Array.from(checkboxes).map(cb => cb.value);
+
+    // Run the list generation again
+    filtList = getRecs();
+    currentIndex = 0;
+    updateUI();
+    updateCounter();
+}
+
+// Get user location and set default as Goldsmiths
+function getLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (pos) => {
+                userCoords = { lat: pos.coords.latitude, lon: pos.coords.longitude };
+                console.log("📍 GPS Locked:", userCoords);
+                fetchRestaurants(); // Load data once we know where we are
+            },
+            (err) => {
+                console.warn("⚠️ GPS Failed, using fallback.");
+                userCoords = { lat: 51.4743, lon: -0.0354 }; // Goldsmiths fallback
+                fetchRestaurants();
+            }
+        );
+    }
+}
+
+function handleSwipe(direction) {
+    if (currentIndex < filtList.length) {
+        if (direction === "right") matches.push(filtList[currentIndex]);
+        currentIndex++;
+        updateUI();
+        updateCounter();
+    }
+}
+
+function updateCounter() {
+    const counter = document.getElementById('counter');
+    if (counter) {
+        counter.innerText = filtList.length > 0 
+            ? `Card ${currentIndex + 1} of ${filtList.length}` 
+            : "No restaurants";
+    }
+}
+
+// Startup when DOM loads
+document.addEventListener("DOMContentLoaded", () => {
+    getLocation();
+});
