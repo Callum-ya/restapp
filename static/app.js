@@ -101,6 +101,18 @@ function updateUI() {
     const current = filtList[currentIndex];
     const displayDist = current.distance_km.toFixed(1);
 
+    // 1. Create the website link only if 'current.website' is not null/empty
+    let websiteHTML = "";
+    if (current.website) {
+        websiteHTML = `
+            <div class="website-wrapper">
+                <a href="${current.website}" target="_blank" class="website-btn">
+                    🌐 Visit Website
+                </a>
+            </div>
+        `;
+    }
+
     card.innerHTML = `
         <div class="restaurant-content">
             <h2>${current.name}</h2>
@@ -109,6 +121,8 @@ function updateUI() {
             <div class="tags">
                 ${current.dietary ? current.dietary.map(t => `<span class="tag">${t}</span>`).join("") : ""}
             </div>
+            
+            ${websiteHTML}
         </div>
     `;
 }
