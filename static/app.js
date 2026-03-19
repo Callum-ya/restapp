@@ -101,12 +101,18 @@ function updateUI() {
     const current = filtList[currentIndex];
     const displayDist = current.distance_km.toFixed(1);
 
-    // 1. Create the website link only if 'current.website' is not null/empty
     let websiteHTML = "";
-    if (current.website) {
+    if (current.website && current.website !== "null") {
+        let cleanUrl = current.website.trim();
+        
+        // Ensure the URL starts with http or https so it doesn't break the link
+        if (!cleanUrl.startsWith("http://") && !cleanUrl.startsWith("https://")) {
+            cleanUrl = `https://${cleanUrl}`;
+        }
+
         websiteHTML = `
-            <div class="website-wrapper">
-                <a href="${current.website}" target="_blank" class="website-btn">
+            <div class="website-container">
+                <a href="${cleanUrl}" target="_blank" rel="noopener noreferrer" class="website-btn">
                     🌐 Visit Website
                 </a>
             </div>
@@ -121,7 +127,6 @@ function updateUI() {
             <div class="tags">
                 ${current.dietary ? current.dietary.map(t => `<span class="tag">${t}</span>`).join("") : ""}
             </div>
-            
             ${websiteHTML}
         </div>
     `;
