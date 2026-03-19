@@ -101,24 +101,6 @@ function updateUI() {
     const current = filtList[currentIndex];
     const displayDist = current.distance_km.toFixed(1);
 
-    let websiteHTML = "";
-    if (current.website && current.website !== "null") {
-        let cleanUrl = current.website.trim();
-        
-        // Ensure the URL starts with http or https so it doesn't break the link
-        if (!cleanUrl.startsWith("http://") && !cleanUrl.startsWith("https://")) {
-            cleanUrl = `https://${cleanUrl}`;
-        }
-
-        websiteHTML = `
-            <div class="website-container">
-                <a href="${cleanUrl}" target="_blank" rel="noopener noreferrer" class="website-btn">
-                    🌐 Visit Website
-                </a>
-            </div>
-        `;
-    }
-
     card.innerHTML = `
         <div class="restaurant-content">
             <h2>${current.name}</h2>
@@ -127,7 +109,6 @@ function updateUI() {
             <div class="tags">
                 ${current.dietary ? current.dietary.map(t => `<span class="tag">${t}</span>`).join("") : ""}
             </div>
-            ${websiteHTML}
         </div>
     `;
 }
