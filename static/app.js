@@ -1,6 +1,6 @@
 let userPref = { 
     dietary: [],
-    maxDistance: 2.0 // in km
+    maxDistance: 1.5 // in km
 };
 
 let userCoords = null; // Will store {lat, lon}
@@ -33,7 +33,7 @@ async function fetchRestaurants() {
     // Fallback to Goldsmiths if GPS isn't ready
     const coords = userCoords || { lat: 51.4743, lon: -0.0354 }; 
     
-    console.log("🚀 Fetching raw data from backend...");
+    //console.log("Fetching raw data from backend...");
 
     try {
         const response = await fetch('/api/restaurants/search', {
@@ -42,14 +42,14 @@ async function fetchRestaurants() {
             body: JSON.stringify({
                 lat: coords.lat,
                 lon: coords.lon,
-                radius_m: 5000 // Fetch a wide 5km net, allow user to change this manually
+                radius_m: 1500 
             })
         });
 
         if (!response.ok) throw new Error(`Status: ${response.status}`);
 
         const data = await response.json();
-        console.log("✅ Data received:", data.length, "restaurants found.");
+        //console.log("Data received:", data.length, "restaurants found.");
         
         allRestaurants = data; 
         applyFilters(); // Initial run
@@ -138,7 +138,7 @@ function getLocation() {
                 fetchRestaurants(); // Load data once we know where we are
             },
             (err) => {
-                console.warn("⚠️ GPS Failed, using fallback.");
+                //console.warn("GPS Failed, using fallback.");
                 userCoords = { lat: 51.4743, lon: -0.0354 }; // Goldsmiths fallback
                 fetchRestaurants();
             }

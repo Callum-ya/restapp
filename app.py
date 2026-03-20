@@ -1,21 +1,22 @@
+# Flask application entry point and app factory
+
 from flask import Flask, send_from_directory
 from flask_cors import CORS
 from routes.restaurants import restaurants_bp
 
-def create_app() -> Flask:
-    # CHANGE 1: Point 'static_folder' to your actual 'static' directory
-    app = Flask(__name__, static_folder='static')
+def create_app() -> Flask: # type: ignore
+    # Create and configure the Flask application instance
+    app = Flask(__name__, static_folder='static') # Needs to point to static directory
     
-    # 1. Initialize CORS for the whole app
+    # Need to enable cross origin resource sharing
     CORS(app) 
     
-    # 2. Register your blueprints
     app.register_blueprint(restaurants_bp, url_prefix="/api/restaurants")
 
-    # 3. Define the home route
+    # Define the home route
     @app.route('/')
     def home():
-        # CHANGE 2: Flask now knows to look inside 'static' for this file
+        # Flask needs to know to look inside static for index
         return app.send_static_file('index.html')
 
     return app
@@ -24,3 +25,8 @@ def create_app() -> Flask:
 if __name__ == "__main__":
     app = create_app()
     app.run(host='0.0.0.0', port=5000, debug=True)
+
+""""curl -i -X POST http://127.0.0.1:5000/api/restaurants/search \
+  -H "Content-Type: application/json" \pwdp
+  -d '{"lat":51.4743,"lon":-0.0354,"radius_m":1500}'"""
+# Should return restaurants within 1500 metres of Goldsmiths.
