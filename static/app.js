@@ -261,7 +261,7 @@ function completeAction() {
         if (swipeCount >= 10) {
             card.innerHTML = `
                 <h3>Limit reached!</h3>
-                <p onclick="window.location.href='saved.html'" style="cursor:pointer; color:#0984e3;">
+                <p onclick="window.location.href='static/saved.html'" style="cursor:pointer; color:#0984e3;">
                     Go to your saved restaurants ->
                 </p>
 `           ;
