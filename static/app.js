@@ -8,7 +8,7 @@ let allRestaurants = []; // Raw data from backend
 let filtList = []; // Data after JS filters are applied
 let currentIndex = 0;
 let matches = [];
-let swipeCount = 0;
+let rightSwipeCount = 0;
 
 // X coords for swiping logic
 let startX = 0;
@@ -223,7 +223,7 @@ function endSwipe() {
 /* --- 4. COLLEAGUE'S UI ACTIONS --- */
 
 function swipeRight() {
-    swipeCount++;
+    rightSwipeCount++;
     const card = document.getElementById("card");
     const currentRestaurant = filtList[currentIndex];
 
@@ -247,7 +247,6 @@ function swipeRight() {
 }
 
 function swipeLeft() {
-    swipeCount++;
     const card = document.getElementById("card");
     card.classList.add("swipe-left");
     completeAction();
@@ -258,7 +257,7 @@ function completeAction() {
         const card = document.getElementById("card");
         card.classList.remove("swipe-right", "swipe-left");
 
-        if (swipeCount >= 10) {
+        if (rightSwipeCount >= 10) {
             card.innerHTML = `
             <h3>Limit reached!</h3>
             <p id="gotosaved" style="cursor:pointer; color:#0984e3;">
@@ -267,7 +266,7 @@ function completeAction() {
             `;
 
             document.getElementById('gotosaved').addEventListener('click', () => {
-                window.location.href = 'saved.html';
+                window.location.href = 'static/saved.html';
             }); 
             
             card.replaceWith(card.cloneNode(true));
@@ -291,5 +290,6 @@ function updateCounter() {
 
 // Startup when DOM loads
 document.addEventListener("DOMContentLoaded", () => {
+    localStorage.removeItem("favourites");
     getLocation();
 });
