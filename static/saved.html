@@ -1,36 +1,75 @@
 <!DOCTYPE html>
 <html>
-    
-  <head>
-    <title>Saved Restaurants</title>
-  </head>
-  
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Saved Restaurants</title>
+
   <style>
-    .nav-btn.saved {
-    background-color: #f3c758; 
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background: #f0f2f5;
+      margin: 0;
+      padding: 20px;
     }
-    .nav-btn.saved:hover {
-      background-color: #d9ab40; 
-      transform: scale(1.05);
+
+    h2 { color: #2d3436; margin-bottom: 0; }
+    h4 { margin-top: 5px; color: #555; }
+
+    .favourites-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      width: 100%;
+      max-width: 350px;
+      margin-top: 20px;
     }
-    .save-btn {
-      margin-top: 15px;
-      padding: 10px 25px;
-      font-size: 16px;
-      font-weight: bold;
-      background-color: #28a745;
-      color: white;
+
+    .card {
+      width: 100%;
+      background: white;
+      border-radius: 20px;
+      padding: 15px;
+      text-align: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+    }
+
+    .restaurant-img {
+      width: 100%;
+      border-radius: 15px;
+    }
+
+    .restaurant-content h2 { font-size: 1.5rem; margin-bottom: 5px; color: #2d3436; }
+        .distance-badge { color: #0984e3; font-weight: bold; margin-bottom: 15px; }
+        .tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
+        .tag { 
+            background: #dfe6e9; 
+            color: #2d3436;
+            padding: 4px 10px; 
+            border-radius: 20px; 
+            font-size: 0.75em; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+
+    .remove-btn {
+      margin-top: 10px;
+      padding: 8px 15px;
+      border-radius: 20px;
       border: none;
-      border-radius: 25px;
+      background: #ff4d4d;
+      color: white;
       cursor: pointer;
-      transition: transform 0.2s ease, background-color 0.2s ease;
     }
-    
-    .save-btn:hover {
-      background-color: #618e3c;
-      transform: scale(1.05);
-    }
-    
+
     .back-btn {
       position: fixed;
       top: 20px;
@@ -43,91 +82,60 @@
       border-radius: 50%;
       font-size: 20px;
       cursor: pointer;
-      z-index: 1000;
-    }
-    
-    .back-btn:hover {
-      background-color: #FF6347;
-    }
-    
-    .favourites-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 20px;
-      padding: 20px;
-    }
-    
-    .favourites-container .box {
-      width: 300px;
-      height: auto;
-      padding: 15px;
     }
   </style>
-
+</head>
 
 <body>
 
-<h2> BiteSwipe</h2>
-  <h4> Saved Restaraunts</h4>
-  
+  <h2>BiteSwipe</h2>
+  <h4> Saved Restaurants</h4>
 
   <button onclick="history.back()" class="back-btn">←</button>
 
   <div id="favouritesList" class="favourites-container"></div>
 
-<script>
-const list = document.getElementById("favouritesList");
-let favourites = JSON.parse(localStorage.getItem("favourites")) || [];
+  <script>
+    const list = document.getElementById("favouritesList");
 
-function renderFavourites() {
+    function renderFavourites() {
+      let favourites = JSON.parse(localStorage.getItem("favourites")) || [];
+      list.innerHTML = "";
 
-  list.innerHTML = "";
+      if (favourites.length === 0) {
+        list.innerHTML = "<p> No saved restaurants</p>";
+        return;
+      }
 
-  if (favourites.length === 0) {
-    list.innerHTML = "<p style='text-align:center;'>No saved restaurants 😢</p>";
-    return;
-  }
+      favourites.forEach((r, index) => {
 
-  favourites.forEach((r, index) => {
+        const card = document.createElement("div");
+        card.className = "card";
 
-    const card = document.createElement("div");
-    card.className = "box";
+        card.innerHTML = `
+            <div class="restaurant-content">
+                <h2>${r.name}</h2>
+                <p class="distance-badge">📍 ${r.distance ? r.distance.toFixed(1) : "N/A"} km away</p>
+                <p><strong>Cuisines:</strong> ${r.cuisines && r.cuisines.length ? r.cuisines.join(", ") : "Various"}</p>
+                <div class="tags">
+                    ${r.dietary ? r.dietary.map(t => `<span class="tag">${t}</span>`).join("") : ""}
+                </div>
+                <button class="remove-btn">Remove</button>
+            </div>
+        `;
 
-    /* Create tags HTML */
-    let tagsHTML = "";
-    if (r.tags) {
-      r.tags.forEach(tag => {
-        tagsHTML += `<span class="tag">${tag}</span>`;
-      });
-    }
+        card.querySelector(".remove-btn").onclick = () => {
+            favourites.splice(index, 1);
+            localStorage.setItem("favourites", JSON.stringify(favourites)); 
+            renderFavourites(); 
+        };
 
-    card.innerHTML = `
-      <img src="images/${r.image}" class="restaurant-img">
-      <h2>${r.name}</h2>
-      <p>${r.rating}</p>
-
-      <div class="tags">
-        ${tagsHTML}
-      </div>
-
-      <p>${r.description}</p>
-
-      <button class="remove-btn">Remove ❌</button>
-    `;
-
-    card.querySelector(".remove-btn").onclick = () => {
-      favourites.splice(index, 1);
-      localStorage.setItem("favourites", JSON.stringify(favourites));
-      renderFavourites();
-    };
-
-    list.appendChild(card);
-  });
+        list.appendChild(card);
+    });
 }
 
 renderFavourites();
-</script>
+  </script>
 
 </body>
 </html>
