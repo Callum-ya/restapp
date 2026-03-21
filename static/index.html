@@ -137,6 +137,15 @@
             transition: transform 0.6s ease-in;
             opacity: 0;
         }
+        .saved-link-btn {
+            margin-bottom: 15px;
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: none;
+            background: #f3c758;
+            font-weight: bold;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -163,6 +172,8 @@
     </div>
 
     <div class="btn-group">
+        <button onclick="window.location.href='saved.html'" class="saved-link-btn">Saved</button>
+
         <button class="btn-circle btn-skip" onclick="swipeLeft()">❌ Skip</button>
         <button class="btn-circle btn-match" onclick="swipeRight()">✅ Match</button>
     </div>
