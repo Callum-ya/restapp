@@ -8,6 +8,7 @@ let allRestaurants = []; // Raw data from backend
 let filtList = []; // Data after JS filters are applied
 let currentIndex = 0;
 let matches = [];
+let swipeCount = 0;
 
 // X coords for swiping logic
 let startX = 0;
@@ -95,6 +96,8 @@ function updateUI() {
 
     if (filtList.length === 0) {
         card.innerHTML = "<h3>No matches found.</h3><p>Try increasing your distance!</p>";
+        // added this to stop the card from swiping left and right when there are no matches -h
+        card.replaceWith(card.cloneNode(true));
         return;
     }
 
@@ -220,13 +223,31 @@ function endSwipe() {
 /* --- 4. COLLEAGUE'S UI ACTIONS --- */
 
 function swipeRight() {
+    swipeCount++;
     const card = document.getElementById("card");
+    const currentRestaurant = filtList[currentIndex];
+
+    let favourites = JSON.parse(localStorage.getItem("favourites")) || [];
+    const exists = favourites.some(r => r.name === currentRestaurant.name);
+
+    if (!exists) {
+        favourites.push({
+            name: currentRestaurant.name,
+            distance: currentRestaurant.distance_km || 0,
+            cuisines: currentRestaurant.cuisines || [],
+            dietary: currentRestaurant.dietary || []
+        });
+
+        localStorage.setItem("favourites", JSON.stringify(favourites));
+    }
+
     card.classList.add("swipe-right");
-    matches.push(filtList[currentIndex]);
+    matches.push(currentRestaurant);
     completeAction();
 }
 
 function swipeLeft() {
+    swipeCount++;
     const card = document.getElementById("card");
     card.classList.add("swipe-left");
     completeAction();
@@ -236,12 +257,24 @@ function completeAction() {
     setTimeout(() => {
         const card = document.getElementById("card");
         card.classList.remove("swipe-right", "swipe-left");
+
+        if (swipeCount >= 10) {
+            card.innerHTML = `
+                <h3>Limit reached!</h3>
+                <p onclick="window.location.href='saved.html'" style="cursor:pointer; color:#0984e3;">
+                    Go to your saved restaurants ->
+                </p>
+`           ;
+            card.onmousedown = null;
+            card.ontouchstart = null;
+            return;
+        }
+
         currentIndex++;
         updateUI();
         updateCounter();
     }, 300);
 }
-
 
 function updateCounter() {
     const counter = document.getElementById('counter');
