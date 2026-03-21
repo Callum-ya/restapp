@@ -260,16 +260,20 @@ function completeAction() {
 
         if (swipeCount >= 10) {
             card.innerHTML = `
-                <h3>Limit reached!</h3>
-                <p onclick="window.location.href='static/saved.html'" style="cursor:pointer; color:#0984e3;">
-                    Go to your saved restaurants ->
-                </p>
-`           ;
-            card.onmousedown = null;
-            card.ontouchstart = null;
+            <h3>Limit reached!</h3>
+            <p id="gotosaved" style="cursor:pointer; color:#0984e3;">
+                Go to your saved restaurants ->
+            </p>
+            `;
+
+            document.getElementById('gotosaved').addEventListener('click', () => {
+                window.location.href = 'saved.html';
+            }); 
+            
+            card.replaceWith(card.cloneNode(true));
             return;
         }
-
+        
         currentIndex++;
         updateUI();
         updateCounter();
