@@ -9,6 +9,11 @@ let filtList = []; // Data after JS filters are applied
 let currentIndex = 0;
 let matches = [];
 
+// X coords for swiping logic
+let startX = 0;
+let currentX = 0;
+let isDragging = false;
+
 // Haversine Formula to calculate distances
 // https://stackoverflow.com/questions/14560999/using-the-haversine-formula-in-javascript
 /**
@@ -111,6 +116,8 @@ function updateUI() {
             </div>
         </div>
     `;
+
+    initSwipe();
 }
 
 function applyFilters() {
@@ -146,14 +153,95 @@ function getLocation() {
     }
 }
 
-function handleSwipe(direction) {
+/* function handleSwipe(direction) {
     if (currentIndex < filtList.length) {
         if (direction === "right") matches.push(filtList[currentIndex]);
         currentIndex++;
         updateUI();
         updateCounter();
     }
+} */
+
+
+function initSwipe() {
+    const card = document.getElementById("card");
+    if (!card || filtList.length === 0 || currentIndex >= filtList.length) return;
+
+    // Reset card visuals for the next item
+    card.style.transform = "translateX(0) rotate(0)";
+    card.style.backgroundColor = "white";
+    currentX = 0;
+
+    card.addEventListener("mousedown", startSwipe);
+    card.addEventListener("touchstart", startSwipe, { passive: false });
 }
+
+function startSwipe(e) {
+    isDragging = true;
+    startX = e.type === "touchstart" ? e.touches[0].clientX : e.clientX;
+    
+    document.addEventListener("mousemove", moveSwipe);
+    document.addEventListener("touchmove", moveSwipe, { passive: false });
+    document.addEventListener("mouseup", endSwipe);
+    document.addEventListener("touchend", endSwipe);
+    
+    document.getElementById("card").style.transition = "none";
+}
+
+function moveSwipe(e) {
+    if (!isDragging) return;
+    const card = document.getElementById("card");
+    currentX = (e.type === "touchmove" ? e.touches[0].clientX : e.clientX) - startX;
+    
+    // Tilt the card as you drag it
+    const rotation = currentX / 15;
+    card.style.transform = `translateX(${currentX}px) rotate(${rotation}deg)`;
+}
+
+function endSwipe() {
+    isDragging = false;
+    document.removeEventListener("mousemove", moveSwipe);
+    document.removeEventListener("touchmove", moveSwipe);
+
+    document.removeEventListener("mouseup", endSwipe);
+    document.removeEventListener("touchend", endSwipe);
+    
+    // If swiped far enough, trigger the choice
+    if (Math.abs(currentX) > 120) {
+        currentX > 0 ? swipeRight() : swipeLeft();
+    } else {
+        // Snap back to center
+        const card = document.getElementById("card");
+        card.style.transition = "transform 0.3s ease";
+        card.style.transform = "translateX(0) rotate(0)";
+    }
+}
+
+/* --- 4. COLLEAGUE'S UI ACTIONS --- */
+
+function swipeRight() {
+    const card = document.getElementById("card");
+    card.classList.add("swipe-right");
+    matches.push(filtList[currentIndex]);
+    completeAction();
+}
+
+function swipeLeft() {
+    const card = document.getElementById("card");
+    card.classList.add("swipe-left");
+    completeAction();
+}
+
+function completeAction() {
+    setTimeout(() => {
+        const card = document.getElementById("card");
+        card.classList.remove("swipe-right", "swipe-left");
+        currentIndex++;
+        updateUI();
+        updateCounter();
+    }, 300);
+}
+
 
 function updateCounter() {
     const counter = document.getElementById('counter');
