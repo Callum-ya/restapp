@@ -1,17 +1,80 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <link rel="stylesheet" href="styles.css">
-  <title>Saved Restaurants</title>
-</head>
+    
+  <head>
+    <title>Saved Restaurants</title>
+  </head>
+  
+  <style>
+    .nav-btn.saved {
+    background-color: #f3c758; 
+    }
+    .nav-btn.saved:hover {
+      background-color: #d9ab40; 
+      transform: scale(1.05);
+    }
+    .save-btn {
+      margin-top: 15px;
+      padding: 10px 25px;
+      font-size: 16px;
+      font-weight: bold;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      transition: transform 0.2s ease, background-color 0.2s ease;
+    }
+    
+    .save-btn:hover {
+      background-color: #618e3c;
+      transform: scale(1.05);
+    }
+    
+    .back-btn {
+      position: fixed;
+      top: 20px;
+      left: 20px;
+      background-color: #FF7F50;
+      color: white;
+      border: none;
+      width: 45px;
+      height: 45px;
+      border-radius: 50%;
+      font-size: 20px;
+      cursor: pointer;
+      z-index: 1000;
+    }
+    
+    .back-btn:hover {
+      background-color: #FF6347;
+    }
+    
+    .favourites-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      padding: 20px;
+    }
+    
+    .favourites-container .box {
+      width: 300px;
+      height: auto;
+      padding: 15px;
+    }
+  </style>
+
 
 <body>
 
-<h1>Your Saved Restaurants </h1>
+<h2> BiteSwipe</h2>
+  <h4> Saved Restaraunts</h4>
+  
 
-<button onclick="history.back()" class="back-btn">←</button>
+  <button onclick="history.back()" class="back-btn">←</button>
 
-<div id="favouritesList" class="favourites-container"></div>
+  <div id="favouritesList" class="favourites-container"></div>
 
 <script>
 const list = document.getElementById("favouritesList");
