@@ -146,6 +146,46 @@
             font-weight: bold;
             cursor: pointer;
         }
+
+        .card-actions{
+            position: absolute;
+            top:0;
+            bottom:0;
+            left:0;
+            right:0;
+            display:flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            pointer-events: none;
+        }
+
+        .card-actions button {
+            pointer-events: auto;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: 2px solid white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease;
+        }
+        
+        .card-actions button:active {
+          transform: scale(0.9);
+        }
+        
+        .action-left { 
+          background-color: rgba(255, 77, 77, 0.9); 
+          color: white; 
+        } 
+        
+        .action-right { 
+          background-color: rgba(46, 204, 113, 0.9); 
+          color: white;
+        
     </style>
 </head>
 <body>
@@ -168,14 +208,15 @@
     <div id="swipe-stage">
         <div id="card">
             <h3>Press "Apply Filters" to Start</h3>
+            <div class="card-actions"
+                <button class="btn-circle btn-skip" onclick="swipeLeft()"> - </button>
+                <button class="btn-circle btn-match" onclick="swipeRight()"> + </button>
+            </div>
         </div>
     </div>
 
     <div class="btn-group">
         <button onclick="window.location.href='static/saved.html'" class="saved-link-btn">Saved</button>
-
-        <button class="btn-skip" onclick="swipeLeft()">❌ Skip</button>
-        <button class="btn-match" onclick="swipeRight()">✅ Match</button>
     </div>
 
     <script src="static/app.js"></script>
