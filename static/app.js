@@ -114,7 +114,7 @@ function updateUI() {
             <a href="${current.website}" target="_blank" class="saved-link-btn" style="text-decoration: none; display: inline-block;">
                 Visit Website
             </a>
-        </div>`
+        </div>`: "";
 
     card.innerHTML = `
         <div class="restaurant-content">
