@@ -231,8 +231,8 @@ function endSwipe() {
 /* Swipe Logic */
 
 function swipeRight() {
-    if (rightSwipeCount >= 5) return;
-    rightSwipeCount++;
+    if (rightSwipeCount >= 5) return; 
+
     const card = document.getElementById("card");
     const currentRestaurant = filtList[currentIndex];
 
@@ -246,12 +246,12 @@ function swipeRight() {
             cuisines: currentRestaurant.cuisines || [],
             dietary: currentRestaurant.dietary || []
         });
-
         localStorage.setItem("favourites", JSON.stringify(favourites));
     }
 
-    card.classList.add("swipe-right");
+    rightSwipeCount++;
     matches.push(currentRestaurant);
+    card.classList.add("swipe-right");
     completeAction();
 }
 
@@ -273,15 +273,18 @@ function completeAction() {
                 Go to your saved restaurants ->
             </p>
             `;
-
             document.getElementById('gotosaved').addEventListener('click', () => {
                 window.location.href = 'static/saved.html';
-            }); 
-            
-            card.replaceWith(card.cloneNode(true));
+            });
+
+            const rightBtn = document.querySelector('.action-right');
+            const leftBtn = document.querySelector('.action-left');
+            if (rightBtn) rightBtn.disabled = true;
+            if (leftBtn) leftBtn.disabled = true;
+
             return;
         }
-        
+
         currentIndex++;
         updateUI();
         updateCounter();
