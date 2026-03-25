@@ -114,6 +114,7 @@ function updateUI() {
             <a href="${current.website}" target="_blank" class="saved-link-btn" style="text-decoration: none; display: inline-block;">
                 Visit Website
             </a>
+        </div>
 
     card.innerHTML = `
         <div class="restaurant-content">
@@ -227,7 +228,7 @@ function endSwipe() {
     }
 }
 
-/* --- 4. COLLEAGUE'S UI ACTIONS --- */
+/* Swipe Logic */
 
 function swipeRight() {
     rightSwipeCount++;
