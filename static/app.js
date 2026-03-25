@@ -86,7 +86,8 @@ function getRecs() {
 
         return matchesDietary;
     })
-    .sort((a, b) => a.distance_km - b.distance_km); // Closest first
+    .sort((a, b) => a.distance_km - b.distance_km) // Closest first
+    .slice(0, 10); // Only display closest 10
 }
 
 // Display updates to user
