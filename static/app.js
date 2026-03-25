@@ -146,10 +146,6 @@ function applyFilters() {
     updateCounter();
 }
 
-function closePopup() {
-    document.getElementById("filterPopup").style.display = "none";
-}
-
 // Get user location and set default as Goldsmiths
 function getLocation() {
     if (navigator.geolocation) {
@@ -304,27 +300,4 @@ function updateCounter() {
 document.addEventListener("DOMContentLoaded", () => {
     localStorage.removeItem("favourites");
     getLocation();
-    
-    //filter popup buttons
-    const popup = document.getElementById("filterPopup");
-    const openBtn = document.getElementById("openFilter");
-    const closeBtn = document.getElementById("closeFilter");
-
-    if (openBtn) {
-        openBtn.onclick = () => {
-            popup.style.display = "flex";
-        };
-    }
-
-    if (closeBtn) {
-        closeBtn.onclick = () => {
-            popup.style.display = "none";
-        };
-    }
-
-    window.onclick = (e) => {
-        if (e.target === popup) {
-            popup.style.display = "none";
-        }
-    };
 });
