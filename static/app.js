@@ -265,7 +265,7 @@ function completeAction() {
         const card = document.getElementById("card");
         card.classList.remove("swipe-right", "swipe-left");
 
-        if (rightSwipeCount >= 10) {
+        if (rightSwipeCount >= 5) {
             card.innerHTML = `
             <h3>Limit reached!</h3>
             <p id="gotosaved" style="cursor:pointer; color:#0984e3;">
