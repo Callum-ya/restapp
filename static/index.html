@@ -21,16 +21,40 @@
         h2 { color: #2d3436; margin-bottom: 10px; }
 
         /* 2. FILTER SECTION */
-        .filter-section { 
-            background: white; 
-            padding: 15px 25px; 
-            border-radius: 12px; 
-            margin-bottom: 20px; 
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
-            width: 100%;
-            max-width: 350px;
+        .filter-popup {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background: rgba(0,0,0,0.5);
+          justify-content: center;
+          align-items: center;
         }
-        .filter-section h4 { margin-top: 0; color: #636e72; }
+        
+        .filter-section {
+          background: white;
+          padding: 20px;
+          border-radius: 10px;
+          width: 300px;
+          position: relative;
+        }
+        
+        .close-btn {
+          position: absolute;
+          top: 10px;
+          right: 15px;
+          cursor: pointer;
+          font-size: 18px;
+        }
+        
+        .apply-btn {
+          width: 100%;
+          padding: 10px;
+          margin-top: 10px;
+          cursor: pointer;
+        }
         
         input[type="number"] {
             padding: 5px;
@@ -193,16 +217,23 @@
 <body>
 
     <h2> BiteSwipe</h2>
+    <button id="openFilter">Open Filters</button>
 
+    <div class="filter-popup" id="filterPopup">
     <div class="filter-section">
+    <span class="close-btn" id="closeFilter">✖</span>
+
         <h4>Filters</h4>
-        <label>Max Distance (km): <input type="number" id="dist-input" value="1.5" step="0.1" min="0.1" max="1.5"></label><br><br>
+        <label>Max Distance (km): 
+            <input type="number" id="dist-input" value="1.5" step="0.1" min="0.1" max="1.5"></label><br><br>
+        
         <div id="dietary-filters">
             <label><input type="checkbox" class="diet-check" value="halal"> Halal</label>
             <label><input type="checkbox" class="diet-check" value="vegan"> Vegan</label>
             <label><input type="checkbox" class="diet-check" value="vegetarian"> Vegetarian</label>
         </div><br>
-        <button onclick="applyFilters()">Apply Filters & Restart</button>
+        <button onclick="applyFilters()" class="apply-btn">Apply Filters & Restart</button>    
+    </div>
     </div>
 
     <div id="counter">Card 0 of 0</div>
