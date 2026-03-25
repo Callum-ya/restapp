@@ -231,6 +231,7 @@ function endSwipe() {
 /* Swipe Logic */
 
 function swipeRight() {
+    if (rightSwipeCount >= 5) return;
     rightSwipeCount++;
     const card = document.getElementById("card");
     const currentRestaurant = filtList[currentIndex];
