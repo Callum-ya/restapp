@@ -109,6 +109,12 @@ function updateUI() {
     const current = filtList[currentIndex];
     const displayDist = current.distance_km.toFixed(1);
 
+    const websiteLink = current.website ?
+        `<div style="margin-top: 20px;">
+            <a href="${current.website}" target="_blank" class="saved-link-btn" style="text-decoration: none; display: inline-block;">
+                Visit Website
+            </a>
+
     card.innerHTML = `
         <div class="restaurant-content">
             <h2>${current.name}</h2>
@@ -117,6 +123,7 @@ function updateUI() {
             <div class="tags">
                 ${current.dietary ? current.dietary.map(t => `<span class="tag">${t}</span>`).join("") : ""}
             </div>
+            ${websiteLink}
         </div>
     `;
 
