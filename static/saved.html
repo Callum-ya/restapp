@@ -23,23 +23,17 @@
     h4 { margin-top: 5px; color: #555; }
 
     .favourites-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
-      gap: 20px; 
+      display: flex;
+      flex-wrap: wrap;         
+      gap: 20px;         
       width: 100%;
       max-width: 1200px;
-      margin-top: 20px;
-      justify-items: center;
+      justify-content: center;   
     }
-
     .card {
-      width: 100%;
+      flex: 1 1 calc(20% - 20px);
       max-width: 220px;
-      background: white;
-      border-radius: 20px;
-      padding: 15px;
-      text-align: center;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+      min-width: 180px;      
     }
 
     .restaurant-img {
