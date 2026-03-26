@@ -12,14 +12,14 @@ let rightSwipeCount = 0;
 
 // Images
 const cuisineImageMap = {
-    "burger": "static/burger.jpg",
-    "pizza": "static/pizza.jpg",
-    "salad": "static/salad.jpg",
-    "sushi": "static/sushi.jpg",
-    "grill": "static/grill.jpg",
-    "steak house": "static/grill.jpg", // Mapping multiple tags to one image
-    "kebab": "static/grill.jpg",
-    "default": "static/restaurant.jpg"
+    "burger": "/static/burger.jpg",
+    "pizza": "/static/pizza.jpg",
+    "salad": "/static/salad.jpg",
+    "sushi": "/static/sushi.jpg",
+    "grill": "/static/grill.jpg",
+    "steak house": "/static/grill.jpg", // Mapping multiple tags to one image
+    "kebab": "/static/grill.jpg",
+    "default": "/static/restaurant.jpg"
 };
 
 // X coords for swiping logic
