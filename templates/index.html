@@ -1,1 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Halal Swipe Prototype</title>
+    <style>
+        /* 1. RESET & BASE STYLES */
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            align-items: center; 
+            background:  url('static/background.jpg') no-repeat center center;
+            background-size: cover;
+            margin: 0;
+            padding: 20px;
+            overflow-x: hidden; /* Prevents scrollbars when card flies off-screen */
+        }
 
+        h2 { color: #2d3436; margin-bottom: 10px; }
+
+        /* 2. FILTER SECTION */
+        .filter-section { 
+            background: white; 
+            padding: 15px 25px; 
+            border-radius: 12px; 
+            margin-bottom: 20px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05); 
+            width: 100%;
+            max-width: 350px;
+        }
+        .filter-section h4 { margin-top: 0; color: #636e72; }
+        
+        input[type="number"] {
+            padding: 5px;
+            border-radius: 4px;
+            border: 1px solid #dfe6e9;
+            width: 60px;
+        }
+
+        /* 3. THE SWIPE STAGE & CARD */
+        #swipe-stage {
+            position: relative;
+            width: 320px;
+            height: 420px;
+            margin: 10px 0;
+            perspective: 1000px; 
+        }
+
+        #card { 
+            width: 100%; 
+            height: 100%; 
+            background: white; 
+            border-radius: 20px; 
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            text-align: center; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15); 
+            position: absolute;
+            cursor: grab; 
+            user-select: none; 
+            touch-action: none; /* Stops mobile scrolling while swiping */
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            z-index: 5;
+            padding: 20px;
+        }
+
+        #card:active { cursor: grabbing; }
+
+        /* 4. RESTAURANT CONTENT STYLING */
+        .restaurant-content h2 { font-size: 1.5rem; margin-bottom: 5px; color: #2d3436; }
+        .distance-badge { color: #0984e3; font-weight: bold; margin-bottom: 15px; }
+        .tags { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px; }
+        .tag { 
+            background: #dfe6e9; 
+            color: #2d3436;
+            padding: 4px 10px; 
+            border-radius: 20px; 
+            font-size: 0.75em; 
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* 5. COUNTER & BUTTONS */
+        #counter { margin-bottom: 10px; font-weight: 600; color: #b2bec3; font-size: 0.9rem; }
+
+        .btn-group { 
+            display: flex; 
+            gap: 30px; 
+            margin-top: 20px; 
+        }
+
+        .btn-circle {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s ease;
+        }
+
+        .btn-circle:hover { transform: scale(1.1); }
+        .btn-circle:active { transform: scale(0.9); }
+
+        .btn-skip { background: #ff7675; color: white; }
+        .btn-match { background: #55efc4; color: white; }
+
+        .apply-btn {
+            width: 100%;
+            padding: 10px;
+            background: #6c5ce7;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        /* 6. FLY AWAY ANIMATIONS */
+        .swipe-right {
+            transform: translateX(1000px) rotate(45deg) !important;
+            transition: transform 0.6s ease-in;
+            opacity: 0;
+        }
+
+        .swipe-left {
+            transform: translateX(-1000px) rotate(-45deg) !important;
+            transition: transform 0.6s ease-in;
+            opacity: 0;
+        }
+        .saved-link-btn {
+            margin-bottom: 15px;
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: none;
+            background: #f3c758;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .card-actions{
+            z-index: 10;
+            position: absolute;
+            top:0;
+            bottom:0;
+            left:0;
+            right:0;
+            display:flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            pointer-events: none;
+        }
+
+        .card-actions button {
+            pointer-events: auto;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            border: 2px solid white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            transition: transform 0.2s ease;
+        }
+        
+        .card-actions button:active {
+          transform: scale(0.9);
+        }
+        
+        .action-left { 
+          background-color: rgba(255, 77, 77, 0.9); 
+          color: white; 
+        } 
+        
+        .action-right { 
+          background-color: rgba(46, 204, 113, 0.9); 
+          color: white;
+        }
+        
+    </style>
+</head>
+<body>
+
+    <h2> BiteSwipe</h2>
+
+    <div class="filter-section">
+        <h4>Filters</h4>
+        <label>Max Distance (km): <input type="number" id="dist-input" value="1.5" step="0.1" min="0.1" max="1.5"></label><br><br>
+        <div id="dietary-filters">
+            <label><input type="checkbox" class="diet-check" value="halal"> Halal</label>
+            <label><input type="checkbox" class="diet-check" value="vegan"> Vegan</label>
+            <label><input type="checkbox" class="diet-check" value="vegetarian"> Vegetarian</label>
+        </div><br>
+        <button onclick="applyFilters()">Apply Filters & Restart</button>
+    </div>
+
+    <div id="counter">Card 0 of 0</div>
+
+    <div id="swipe-stage">
+        <div id="card">
+            <h3>Press "Apply Filters" to Start</h3>
+        </div>            
+        <div class="card-actions">
+            <button class="btn-circle btn-skip action-left" onclick="swipeLeft()"> - </button>
+            <button class="btn-circle btn-match action-right" onclick="swipeRight()"> + </button>
+        </div>
+    </div>
+
+    <div class="btn-group">
+        <button onclick="window.location.href='static/saved.html'" class="saved-link-btn">Saved</button>
+    </div>
+
+    <script src="static/app.js"></script>
+</body>
+</html>
