@@ -327,6 +327,19 @@ function updateCounter() {
 
 // Startup when DOM loads
 document.addEventListener("DOMContentLoaded", () => {
+    const gdprAccepted = localStorage.getItem("gdpr_accepted");
+        if (!gdprAccepted) {
+            document.getElementById("gdpr-popup").style.display = "flex";
+        } else {
+            document.getElementById("gdpr-popup").style.display = "none";
+            getLocation(); // Only start GPS if already accepted
+        }
+
+    document.getElementById("accept-gdpr").addEventListener("click", () => {
+        localStorage.setItem("gdpr_accepted", "true");
+        document.getElementById("gdpr-popup").style.display = "none";
+        getLocation(); 
+    });
     localStorage.removeItem("favourites");
     getLocation();
 });
