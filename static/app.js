@@ -10,6 +10,18 @@ let currentIndex = 0;
 let matches = [];
 let rightSwipeCount = 0;
 
+// Images
+const cuisineImageMap = {
+    "burger": "static/burger.jpg",
+    "pizza": "static/pizza.jpg",
+    "salad": "static/salad.jpg",
+    "sushi": "static/sushi.jpg",
+    "grill": "static/grill.jpg",
+    "steak house": "static/grill.jpg", // Mapping multiple tags to one image
+    "kebab": "static/grill.jpg",
+    "default": "static/restaurant.jpg"
+};
+
 // X coords for swiping logic
 let startX = 0;
 let currentX = 0;
@@ -110,6 +122,15 @@ function updateUI() {
     const current = filtList[currentIndex];
     const displayDist = current.distance_km.toFixed(1);
 
+    // Add image
+    let localImage = cuisineImageMap.default;
+    if (current.cuisines && current.cuisines.length > 0) {
+        // Find the first tag that exists in our cuisineImageMap
+        const match = current.cuisines.find(c => cuisineImageMap[c.toLowerCase()]);
+        if (match) {
+            localImage = cuisineImageMap[match.toLowerCase()];
+        }
+    }
     const websiteLink = current.website ?
         `<div style="margin-top: 20px;">
             <a href="${current.website}" target="_blank" class="saved-link-btn" style="text-decoration: none; display: inline-block;">
@@ -119,6 +140,9 @@ function updateUI() {
 
     card.innerHTML = `
         <div class="restaurant-content">
+           <img src="${localImagePath}" alt="Cuisine Preview" 
+                 style="width:100%; height:160px; object-fit:cover; border-radius:15px; margin-bottom:12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"> 
+        
             <h2>${current.name}</h2>
             <p class="distance-badge">📍 ${displayDist} km away</p>
             <p><strong>Cuisines:</strong> ${current.cuisines ? current.cuisines.join(", ") : "Various"}</p>
