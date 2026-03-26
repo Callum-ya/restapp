@@ -140,7 +140,7 @@ function updateUI() {
 
     card.innerHTML = `
         <div class="restaurant-content">
-           <img src="${localImagePath}" alt="Cuisine Preview" 
+           <img src="${localImage}" alt="Cuisine Preview" 
                  style="width:100%; height:160px; object-fit:cover; border-radius:15px; margin-bottom:12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"> 
         
             <h2>${current.name}</h2>
