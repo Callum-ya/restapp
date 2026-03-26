@@ -1,6 +1,6 @@
 # Flask application entry point and app factory
 
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, render_template, jsonify, request
 from flask_cors import CORS
 from routes.restaurants import restaurants_bp
 
@@ -16,8 +16,8 @@ def create_app() -> Flask: # type: ignore
     # Define the home route
     @app.route('/')
     def home():
-        # Flask needs to know to look inside static for index
-        return app.send_static_file('index.html')
+        # find the right html page
+        return render_template('index.html')
 
     return app
 
