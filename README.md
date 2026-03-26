@@ -1,3 +1,5 @@
+ReadMe File
+
 # SwipeBite
 
 SwipeBite is a lightweight restaurant discovery app designed to reduce decision fatigue by narrowing down nearby restaurant options using filters (dietary, cuisine, distance).
@@ -27,3 +29,7 @@ The backend queries OpenStreetMap (OSM) via the Overpass API and returns a clean
 - Continue until you find a suitable place to eat
 
 ## Scope & Future Improvements
+
+This project follows an iterative development approach, prioritising essential features first.
+The current version focuses on decision support rather than full food delivery functionality. 
+Features such as user accounts, price filtering, and rating systems were considered but are planned for future development.
