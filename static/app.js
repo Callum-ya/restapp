@@ -123,12 +123,12 @@ function updateUI() {
     const displayDist = current.distance_km.toFixed(1);
 
     // Add image
-    let localImage = cuisineImageMap.default;
+    let localImagePath = cuisineImageMap.default;
     if (current.cuisines && current.cuisines.length > 0) {
         // Find the first tag that exists in our cuisineImageMap
         const match = current.cuisines.find(c => cuisineImageMap[c.toLowerCase()]);
         if (match) {
-            localImage = cuisineImageMap[match.toLowerCase()];
+            localImagePath = cuisineImageMap[match.toLowerCase()];
         }
     }
     const websiteLink = current.website ?
@@ -140,7 +140,7 @@ function updateUI() {
 
     card.innerHTML = `
         <div class="restaurant-content">
-           <img src="${localImage}" alt="Cuisine Preview" 
+           <img src="${localImagePath}" alt="Cuisine Preview" 
                  style="width:100%; height:160px; object-fit:cover; border-radius:15px; margin-bottom:12px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);"> 
         
             <h2>${current.name}</h2>
